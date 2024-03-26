@@ -3,10 +3,14 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+// jwt verification
+let { expressjwt } = require('express-jwt')
+
 
 // set routers for users and articles
-var articlesRouter = require('./routes/articles');
-var usersRouter = require('./routes/users');
+var articlesRouter = require('./routes/articles.js');
+var usersRouter = require('./routes/users.js');
+var uploadRouter = require('./routes/upload.js');
 
 var app = express();
 
@@ -19,18 +23,50 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+// jwt use
+app.use(expressjwt({
+  secret: 'test12345',
+  algorithms: ['HS256']
+}).unless({
+  // those pathes below, no need for token verify
+  path: [
+    '/api/users',
+    // /api/articles/users/:uid
+    /^\/api\/articles\/users\/\w+/,
+    {
+      // /api/articles/:aid (GET)
+      url : /^\/api\/articles\/\w+/,
+      methods : ['GET'],
+    },
+  ],
+}))
 
-// use routers for users and articles
+// use routers for users and articles, upload
 app.use('/api/articles', articlesRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/upload', uploadRouter);
+
+// jwt verification error handler
+app.use((err, req, res, next) => {
+  if(err.name === "UnauthorizedError") {
+    res
+      .status(401)
+      .json({
+        code : 0,
+        msg : "Unavailable token -- please reattempt"
+      })
+  } else {
+    next(err)
+  }
+})
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

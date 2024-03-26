@@ -10,6 +10,8 @@ var router = express.Router();
  */
 router.post('/', (req, res, next) => {
   console.log(req.body);
+  // { username: 'admin', iat: 1711462281, exp: 1742998281 }
+  console.log(req.auth);
   res.json({
     code : 1,
     msg : 'Create article successfully'
