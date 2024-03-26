@@ -142,33 +142,37 @@ let Article = mongoose.model('Article', ArticleSchema)
 // })
 
 /* Search All Articles By Multi Conditions*/
-Article.find({
-    views: { $gte: 0, $lte: 1000 },
-    title: /TEST/
-})
-.sort({_id : -1})
-.skip(1)
-.limit(10)
-.select({updatedAt : 0, __v : 0})
-// show reference author
-.populate('author', {
-    // not show password
-    password : 0,
-})
-// show reference comments
-.populate('coms')
-.exec()
-.then(r => {
-    console.log(r);
-})
+// Article.find({
+//     views: { $gte: 0, $lte: 1000 },
+//     title: /TEST/
+// })
+// .sort({_id : -1})
+// .skip(1)
+// .limit(10)
+// .select({updatedAt : 0, __v : 0})
+// // show reference author
+// .populate('author', {
+//     // not show password
+//     password : 0,
+// })
+// // show reference comments
+// .populate('coms')
+// .exec()
+// .then(r => {
+//     console.log(r);
+// })
 
 // thead / user structure
 let UserSchema = new Schema(
     {
-        username : String,
+        username : {
+            type : String,
+            unique : true,
+            required : true,
+        },
         password : String,
         nickname : String,
-        headImage : String,
+        headImgUrl : String,
     },
     {
         timestamps : true,
@@ -234,11 +238,11 @@ let Comment =mongoose.model('Comment', CommentSchema)
 //     console.log(r);
 // })
 
-Comment.find({article_id : '66033cdfbda921e0e73f6336'})
-.populate('reply_user_id', {password : 0})
-.then(r => {
-    console.log(r);
-})
+// Comment.find({article_id : '66033cdfbda921e0e73f6336'})
+// .populate('reply_user_id', {password : 0})
+// .then(r => {
+//     console.log(r);
+// })
 
 module.exports = {
     Comment,Article,User

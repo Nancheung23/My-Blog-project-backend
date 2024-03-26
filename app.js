@@ -11,6 +11,7 @@ let { expressjwt } = require('express-jwt')
 var articlesRouter = require('./routes/articles.js');
 var usersRouter = require('./routes/users.js');
 var uploadRouter = require('./routes/upload.js');
+var commentRouter = require('./routes/comments.js');
 
 var app = express();
 
@@ -45,6 +46,7 @@ app.use(expressjwt({
 app.use('/api/articles', articlesRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/comments', commentRouter);
 
 // jwt verification error handler
 app.use((err, req, res, next) => {
