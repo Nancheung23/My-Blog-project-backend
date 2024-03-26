@@ -1,3 +1,4 @@
+const e = require('express');
 let mongoose = require('mongoose')
 
 // connect database
@@ -15,7 +16,8 @@ let ArticleSchema = new Schema(
     {
         title: String,
         content: String,
-        author: String,
+        // refer UserSchema --> get author id
+        author: {type : Schema.Types.ObjectId, ref : 'User'},
         tag: String,
         views: {
             type: Number,
@@ -27,6 +29,22 @@ let ArticleSchema = new Schema(
         timestamps: true,
     }
 )
+
+// virtual ref to Comment , need to create before add model!
+ArticleSchema.virtual('coms', {
+    // ref model
+    ref : 'Comment',
+    localField : '_id',
+    foreignField : 'article_id',
+    // get an array
+    justOne : false,
+    // if count == true, only show length
+    count : true
+})
+// set
+ArticleSchema.set('toObject', {virtuals : true})
+ArticleSchema.set('toJSON', {virtuals : true})
+
 // Create Model by Schema
 let Article = mongoose.model('Article', ArticleSchema)
 
@@ -47,13 +65,13 @@ let Article = mongoose.model('Article', ArticleSchema)
 //     {
 //         title: 'TEST0',
 //         content: 'test0',
-//         author: 'Yannan Zhang',
+//         author: '66033c4d8871370db6922045',
 //         tag: 'test',
 //     },
 //     {
 //         title: 'TEST1',
 //         content: 'test1',
-//         author: 'Yannan Zhang',
+//         author: '66033c6e523ecc31fdc6bce1',
 //         tag: 'test',
 //     }
 // ).then(r => {
@@ -64,7 +82,8 @@ let Article = mongoose.model('Article', ArticleSchema)
 // let a1 = new Article({
 //     title: 'TEST2',
 //     content: 'test2',
-//     author: 'Yannan Zhang',
+//     // match author as userid
+//     author: '66033c77dae9dcc32a5f2a8c',
 //     tag: 'test',
 // })
 
@@ -111,16 +130,16 @@ let Article = mongoose.model('Article', ArticleSchema)
 // })
 
 /* Search One Article*/
-Article.findById('6602fc0fdcafdee3254b2965').then(r => {
-    console.log(r);
-})
+// Article.findById('6602fc0fdcafdee3254b2965').then(r => {
+//     console.log(r);
+// })
 
 /* Search One Article And Update*/
-Article.findByIdAndUpdate('6602fc0fdcafdee3254b2965', {
-    $inc: { views: 1 },
-}, {
-    timestamps: false,
-})
+// Article.findByIdAndUpdate('6602fc0fdcafdee3254b2965', {
+//     $inc: { views: 1 },
+// }, {
+//     timestamps: false,
+// })
 
 /* Search All Articles By Multi Conditions*/
 Article.find({
@@ -129,9 +148,98 @@ Article.find({
 })
 .sort({_id : -1})
 .skip(1)
-.limit(1)
+.limit(10)
 .select({updatedAt : 0, __v : 0})
+// show reference author
+.populate('author', {
+    // not show password
+    password : 0,
+})
+// show reference comments
+.populate('coms')
 .exec()
 .then(r => {
     console.log(r);
 })
+
+// thead / user structure
+let UserSchema = new Schema(
+    {
+        username : String,
+        password : String,
+        nickname : String,
+        headImage : String,
+    },
+    {
+        timestamps : true,
+    }
+)
+
+let User = mongoose.model('User', UserSchema)
+
+/* Create User*/
+// User.create(
+//     {
+//         username : 'admin3',
+//         password : 'admin',
+//         nickname : 'admin',
+//         headImage : '../public/images/1711461154404.png',
+//     }
+// ).then(
+//     r => {
+//         console.log(r);
+//         console.log('Create User Successfully');
+//     }
+// ).catch(
+//     err => {
+//         console.log(err);
+//     }
+// )
+
+// thead / comment structure
+let CommentSchema = new Schema(
+    {
+        content : String,
+        article_id : {type : Schema.Types.ObjectId, ref : 'Article'},
+        reply_user_id : {type : Schema.Types.ObjectId, ref : 'User'}
+    }
+)
+
+let Comment =mongoose.model('Comment', CommentSchema)
+
+/* Create Comment*/
+// Comment.create(
+//     {
+//         content : 'Test',
+//         article_id : '66033cdfbda921e0e73f6334',
+//         reply_user_id : '66033c6e523ecc31fdc6bce1'
+//     },
+//     {
+//         timestamps : true,
+//     }
+// ).then( r => {
+//     console.log(r);
+// })
+
+// Comment.create(
+//     {
+//         content : 'Test2',
+//         article_id : '66033cdfbda921e0e73f6336',
+//         reply_user_id : '66033c77dae9dcc32a5f2a8c'
+//     },
+//     {
+//         timestamps : true,
+//     }
+// ).then( r => {
+//     console.log(r);
+// })
+
+Comment.find({article_id : '66033cdfbda921e0e73f6336'})
+.populate('reply_user_id', {password : 0})
+.then(r => {
+    console.log(r);
+})
+
+module.exports = {
+    Comment,Article,User
+}
