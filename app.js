@@ -32,6 +32,7 @@ app.use(expressjwt({
   // those pathes below, no need for token verify
   path: [
     '/api/users',
+    '/api/upload',
     // /api/articles/users/:uid
     /^\/api\/articles\/users\/\w+/,
     {
@@ -41,6 +42,23 @@ app.use(expressjwt({
     },
   ],
 }))
+
+// solve Access-Control-Allow-Origin problem
+app.all('*', (req, res, next) => {
+  // set cors
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*')
+  // header type
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+  // request methods
+  res.header('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS')
+  // with cookies
+  res.header('Access-Control-Allow-Credentials', true)
+  if(req.method == 'OPTIONS') {
+    res.sendStatus(200).end()
+  } else {
+    next()
+  }
+})
 
 // use routers for users and articles, upload
 app.use('/api/articles', articlesRouter);

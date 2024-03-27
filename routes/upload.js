@@ -25,7 +25,6 @@ let upload = multer({storage : storage}).single('img')
  */
 router.post('/', upload, (req, res) => {
     let file = req.file
-    console.log(file)
     let imgUrl = "/images/" + file.filename
     res.json({
         code: 1,
