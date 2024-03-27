@@ -1,20 +1,30 @@
 var express = require('express');
 var router = express.Router();
+let { Article } = require('../modules/index')
 
 /* Create Article */
 /* /api/articles */
 /**
- * @param req.body.userid
+ * @param req.auth.uid
  * @param req.body.title
  * @param req.body.content
  */
 router.post('/', (req, res, next) => {
-  console.log(req.body);
   // { username: 'admin', iat: 1711462281, exp: 1742998281 }
-  console.log(req.auth);
-  res.json({
-    code : 1,
-    msg : 'Create article successfully'
+  Article.create({
+    ...req.body,
+    author: req.auth.uid,
+  }).then(r => {
+    res.json({
+      code: 1,
+      msg: 'Create article successfully',
+    })
+  }).catch(err => {
+    res.json({
+      code: 0,
+      msg: 'Error: Create article Failed',
+      err: err
+    })
   })
 });
 
@@ -24,11 +34,20 @@ router.post('/', (req, res, next) => {
  * @param uid
  */
 router.get('/users/:uid', (req, res, next) => {
-  console.log(req.query);
-  res.json({
-    code : 1,
-    msg : 'Successfully fetch article list by userId'
-  })
+  Article.find({ author: req.params.uid })
+    .populate('author', { password: 0 })
+    .populate('coms')
+    .then(r => {
+      res.json({
+        code: 1,
+        msg: 'Successfully fetch article list by userId'
+      })
+    }).catch(err => {
+      res.json({
+        code: 0,
+        msg: 'Error: Failed fetch article list by userId'
+      })
+    })
 });
 
 /* Get Article By Article Id */
@@ -37,11 +56,25 @@ router.get('/users/:uid', (req, res, next) => {
  * @param aid
  */
 router.get('/:aid', (req, res, next) => {
-  console.log(req.body);
-  res.json({
-    code : 1,
-    msg : 'Successfully fetch article by articleId'
-  })
+  Article.findByIdAndUpdate(
+    req.params.aid,
+    // views ++
+    { $inc: { views: 1 } },
+    // latest
+    { new: true }
+  ).populate('author', { password: 0 })
+    .populate('coms').then(r => {
+      res.json({
+        code: 1,
+        msg: 'Successfully fetch article by articleId'
+      })
+    }).catch(err => {
+      res.json({
+        code: 0,
+        msg: 'Error: Failed fetch article by articleId',
+        err: err
+      })
+    })
 });
 
 /* Delete Article By Article Id */
@@ -50,11 +83,26 @@ router.get('/:aid', (req, res, next) => {
  * @param aid
  */
 router.delete('/:aid', (req, res, next) => {
-  console.log(req.body);
-  res.json({
-    code : 1,
-    msg : 'Successfully fetch article by articleId'
-  })
+  Article.findByIdAndDelete(req.params.aid)
+    .then(r => {
+      if (r) {
+        res.json({
+          code: 1,
+          msg: 'Successfully deleted article by articleId'
+        })
+      } else {
+        res.json({
+          code: 0,
+          msg: 'Error: Article already deleted',
+        })
+      }
+    }).catch(err => {
+      res.json({
+        code: 0,
+        msg: 'Error: Failed deleted article by articleId',
+        err: err
+      })
+    })
 });
 
 /* Modify Article By Article Id */
@@ -66,9 +114,20 @@ router.delete('/:aid', (req, res, next) => {
  */
 router.patch('/:aid', (req, res, next) => {
   console.log(req.body);
-  res.json({
-    code : 1,
-    msg : 'Successfully fetch article by articleId'
-  })
+  Article.findByIdAndUpdate(req.params.aid,
+    { ...req.body },
+    { new: true }).then(r => {
+      res.json({
+        code: 1,
+        msg: 'Successfully modify article by articleId',
+        data: r,
+      })
+    }).catch(err => {
+      res.json({
+        code: 0,
+        msg: 'Error: Failed modify article by articleId',
+        err: err
+      })
+    })
 });
 module.exports = router;

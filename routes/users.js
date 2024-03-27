@@ -19,7 +19,7 @@ router.post('/', (req, res, next) => {
   if (!username || !password || !nickname || !headImgUrl) {
     res.json({
       code: 0,
-      msg: 'Register failed -- Lacking of args'
+      msg: 'Error: Register failed -- Lacking of args'
     });
     return;
   } else {
@@ -34,7 +34,7 @@ router.post('/', (req, res, next) => {
       console.log(req.body);
       res.json({
         code: 0,
-        msg: 'Register failed -- Duplicated username',
+        msg: 'Error: Register failed -- Duplicated username',
         err : err
       });
     })
@@ -52,23 +52,26 @@ let jwt = require('jsonwebtoken')
 router.get('/', (req, res, next) => {
   let { username, password } = req.query;
   User.findOne({ username, password }).then(r => {
-    console.log(r);
     if (r == null) {
       res.json({
         code: 0,
-        msg: 'Login failed'
+        msg: 'Error: Login failed'
       })
     } else {
       // {data}, {encrypt}, {expires ; algorithm}
       /**
        * @example     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzExNDYyMjgxLCJleHAiOjE3NDI5OTgyODF9.ap-jXurmE81K27wKLoVAajX9iD5gWeWB0TIUzS0UoF0"
        */
-      let token = jwt.sign({ username: username }, 'test12345', { expiresIn: '365 days', algorithm: 'HS256' })
+      let token = jwt.sign({ username: username, uid : r._id }, 'test12345', { expiresIn: '365 days', algorithm: 'HS256' })
       res.json({
         code: 1,
         msg: 'Login successfully',
         // return token
         token,
+        uid : r._id,
+        username : r.username,
+        nickname : r.nickname,
+        headImgUrl : r.headImgUrl
       })
     }
   })
