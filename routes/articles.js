@@ -40,6 +40,7 @@ router.get('/users/:uid', (req, res, next) => {
     .then(r => {
       res.json({
         code: 1,
+        data : r.data,
         msg: 'Successfully fetch article list by userId'
       })
     }).catch(err => {
