@@ -11,6 +11,8 @@ let { Article } = require('../modules/index')
  */
 router.post('/', (req, res, next) => {
   // { username: 'admin', iat: 1711462281, exp: 1742998281 }
+  console.log(req.body);
+  console.log(req.auth);
   Article.create({
     ...req.body,
     author: req.auth.uid,
@@ -18,6 +20,7 @@ router.post('/', (req, res, next) => {
     res.json({
       code: 1,
       msg: 'Create article successfully',
+      data : r,
     })
   }).catch(err => {
     res.json({
@@ -38,15 +41,17 @@ router.get('/users/:uid', (req, res, next) => {
     .populate('author', { password: 0 })
     .populate('coms')
     .then(r => {
+      console.log(r);
       res.json({
         code: 1,
-        data : r.data,
-        msg: 'Successfully fetch article list by userId'
+        msg: 'Successfully fetch article list by userId',
+        data : r,
       })
     }).catch(err => {
       res.json({
         code: 0,
-        msg: 'Error: Failed fetch article list by userId'
+        msg: 'Error: Failed fetch article list by userId',
+        data : err,
       })
     })
 });
@@ -67,13 +72,14 @@ router.get('/:aid', (req, res, next) => {
     .populate('coms').then(r => {
       res.json({
         code: 1,
-        msg: 'Successfully fetch article by articleId'
+        msg: 'Successfully fetch article by articleId',
+        data : r,
       })
     }).catch(err => {
       res.json({
         code: 0,
         msg: 'Error: Failed fetch article by articleId',
-        err: err
+        data: err
       })
     })
 });
@@ -89,19 +95,21 @@ router.delete('/:aid', (req, res, next) => {
       if (r) {
         res.json({
           code: 1,
-          msg: 'Successfully deleted article by articleId'
+          msg: 'Successfully deleted article by articleId',
+          data : r,
         })
       } else {
         res.json({
           code: 0,
           msg: 'Error: Article already deleted',
+          data : err,
         })
       }
     }).catch(err => {
       res.json({
         code: 0,
         msg: 'Error: Failed deleted article by articleId',
-        err: err
+        data: err
       })
     })
 });
