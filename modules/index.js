@@ -39,7 +39,7 @@ ArticleSchema.virtual('coms', {
     // get an array
     justOne : false,
     // if count == true, only show length
-    count : true
+    count : false
 })
 // set
 ArticleSchema.set('toObject', {virtuals : true})
