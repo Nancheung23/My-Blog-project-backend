@@ -206,6 +206,9 @@ let CommentSchema = new Schema(
         content : String,
         article_id : {type : Schema.Types.ObjectId, ref : 'Article'},
         reply_user_id : {type : Schema.Types.ObjectId, ref : 'User'}
+    },
+    {
+        timestamps : true,
     }
 )
 
