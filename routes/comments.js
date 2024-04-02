@@ -18,12 +18,13 @@ router.post('/', (req,res) => {
         res.json({
             code : 1,
             msg : 'Create Comment Successfully',
+            data : r,
         })
     }).catch(err => {
         res.json({
             code : 0,
             msg : 'Error: Create Comment Failed',
-            err : err,
+            data : err,
         })
     })
 })
@@ -36,7 +37,9 @@ router.post('/', (req,res) => {
 router.get('/articles/:aid', (req, res) => {
     Comment.find({
         article_id : req.params.aid
-    }).then(r => {
+    })
+    .populate('reply_user_id')
+    .then(r => {
         res.json({
             code : 1,
             msg : 'Get Comment Successfully',
@@ -56,7 +59,7 @@ router.get('/articles/:aid', (req, res) => {
 router.delete('/:cid', async (req, res) => {
     // cid -> comment -> author
     let commentObj = await Comment.findById(req.params.cid).populate('article_id')
-    let author_id = commentObj.article_id._id
+    let author_id = commentObj.article_id.author
     // if comment belongs to author of article
     if(author_id == req.auth.uid) {
         let r = await Comment.findByIdAndDelete(req.params.cid)

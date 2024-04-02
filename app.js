@@ -50,7 +50,7 @@ app.all('*', (req, res, next) => {
   // header type
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
   // request methods
-  res.header('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS')
+  res.header('Access-Control-Allow-Methods', 'PUT,POST,GET,PATCH,DELETE,OPTIONS')
   // with cookies
   res.header('Access-Control-Allow-Credentials', true)
   if(req.method == 'OPTIONS') {
