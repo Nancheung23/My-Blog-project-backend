@@ -13,6 +13,10 @@ var usersRouter = require('./routes/users.js');
 var uploadRouter = require('./routes/upload.js');
 var commentRouter = require('./routes/comments.js');
 
+// set routers for frontend
+var articlesFrontRouter = require('./routes/front/articles.js');
+var commentFrontRouter = require('./routes/front/comments.js');
+
 var app = express();
 
 // view engine setup
@@ -40,6 +44,12 @@ app.use(expressjwt({
       url : /^\/api\/articles\/\w+/,
       methods : ['GET'],
     },
+    '/api/front/articles',
+    {
+      // /api/articles/:aid (GET)
+      url : /^\/api\/front\/articles\/\w+/,
+      methods : ['GET'],
+    },
   ],
 }))
 
@@ -65,6 +75,10 @@ app.use('/api/articles', articlesRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/comments', commentRouter);
+
+// use routers for frontend
+app.use('/api/front/articles', articlesFrontRouter);
+app.use('/api/front/comments', commentFrontRouter);
 
 // jwt verification error handler
 app.use((err, req, res, next) => {
