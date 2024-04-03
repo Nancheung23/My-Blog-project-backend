@@ -30,7 +30,7 @@ router.post('/', (req,res) => {
 })
 
 /* Get Comment By Id*/
-/* /api/comments/articles/:aid */
+/* /api/front/comments/articles/:aid */
 /**
  * @param req.params.aid
  */

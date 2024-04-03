@@ -50,6 +50,11 @@ app.use(expressjwt({
       url : /^\/api\/front\/articles\/\w+/,
       methods : ['GET'],
     },
+    {
+      // /api/articles/:aid (GET)
+      url : /^\/api\/front\/comments\/\w+/,
+      methods : ['GET'],
+    },
   ],
 }))
 
